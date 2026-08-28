@@ -1,4 +1,4 @@
-name: Build ROCm 10.0.0 GA Docker Images (AMD)
+name: Build ROCm 10 Docker Images (AMD)
 on:
   workflow_dispatch:
     inputs:
@@ -120,6 +120,8 @@ jobs:
   # gfx1250 is a separate job rather than a third leg of the publish matrix:
   # there is no MI450 runner pool, so nothing below consumes this image, and a
   # gfx1250-only build failure must not gate the gfx942/gfx950 validation chain.
+  # It also builds a different stack -- the ROCm 10.1 nightly channel, where the
+  # gfx1250 enablement lands -- rather than the 10.0.0 GA release above.
   publish-gfx1250:
     if: github.repository == 'sgl-project/sglang' && (github.event_name != 'push' || github.ref == 'refs/heads/rocm10-gfx1250') && (github.event_name != 'workflow_dispatch' || inputs.job_select == 'all' || inputs.job_select == 'publish-gfx1250')
     runs-on: amd-docker-scale
@@ -127,7 +129,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gpu_arch: ['gfx1250-rocm1000']
+        gpu_arch: ['gfx1250-rocm1010']
         build_type: ['all']
     steps:
       - name: Checkout repository
@@ -180,7 +182,7 @@ jobs:
           echo "Pretend version: ${pretend_version}"
 
           case "${{ matrix.gpu_arch }}" in
-            gfx1250-rocm1000) rocm_tag="rocm1000-mi45x" ;;
+            gfx1250-rocm1010) rocm_tag="rocm1010-mi45x" ;;
             *)
               echo "Unsupported gfx arch"
               exit 1
